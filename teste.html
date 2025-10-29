@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador de Senha</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #senhaInput {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        #analisarButton {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #analisarButton:hover {
+            background-color: #0056b3;
+        }
+        #resultado {
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            min-height: 50px;
+        }
+        .classificacao {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .forte { color: #28a745; }
+        .media { color: #ffc107; }
+        .fraca { color: #dc3545; }
+        #resultado ul {
+            list-style-type: '✅  ';
+            padding-left: 20px;
+            margin-top: 15px;
+        }
+        #resultado li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analisador de Força de Senha</h1>
+        <input type="text" id="senhaInput" placeholder="Digite a senha para analisar...">
+        <button id="analisarButton" onclick="analisarSenha()">Analisar Senha</button>
+        <div id="resultado">
+            <p>Digite uma senha e clique no botão para ver a análise.</p>
+        </div>
+    </div>
+    <script>
+        function verificarForcaSenha(senha) {
+            let pontos = 0;
+            let feedback = [];
+            if (senha.length >= 12) {
+                pontos += 1;
+            } else if (senha.length >= 8) {
+                pontos += 1;
+                feedback.push("A senha é boa, mas ter 12+ caracteres a tornaria muito mais forte.");
+            } else {
+                feedback.push("A senha é curta. O ideal são pelo menos 8 caracteres.");
+            }
+            if (/[a-z]/.test(senha)) {
+                pontos += 1;
+            } else {
+                feedback.push("Adicione letras minúsculas (a-z).");
+            }
+            if (/[A-Z]/.test(senha)) {
+                pontos += 1;
+            } else {
+                feedback.push("Adicione letras maiúsculas (A-Z).");
+            }
+            if (/\d/.test(senha)) {
+                pontos += 1;
+            } else {
+                feedback.push("Adicione números (0-9).");
+            }
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(senha)) {
+                pontos += 1;
+            } else {
+                feedback.push("Adicione símbolos especiais (ex: !@#$%&*).");
+            }
+            if (pontos === 5) {
+                return { classificacao: "Forte", feedback: [] };
+            } else if (pontos >= 3) {
+                return { classificacao: "Média", feedback: feedback };
+            } else {
+                return { classificacao: "Fraca", feedback: feedback };
+            }
+        }
+        function analisarSenha() {
+            const senhaInput = document.getElementById('senhaInput');
+            const resultadoDiv = document.getElementById('resultado');
+            const senha = senhaInput.value;
+            if (senha.length === 0) {
+                resultadoDiv.innerHTML = '<p style="color: #dc3545;">Por favor, digite uma senha antes de analisar.</p>';
+                return;
+            }
+            const analise = verificarForcaSenha(senha);
+            let classeCss = analise.classificacao.toLowerCase();
+            let htmlResultado = `
+                <h3>Classificação da senha: <span class="classificacao ${classeCss}">${analise.classificacao.toUpperCase()}</span></h3>
+            `;
+            if (analise.feedback.length > 0) {
+                htmlResultado += '<h4>Motivos / Sugestões de Melhoria:</h4><ul>';
+                analise.feedback.forEach(motivo => {
+                    htmlResultado += `<li>${motivo}</li>`;
+                });
+                htmlResultado += '</ul>';
+            } else {
+                htmlResultado += '<p style="color: #28a745; font-weight: bold;">✅ Sua senha é excelente e atende a todos os critérios de segurança!</p>';
+            }
+            resultadoDiv.innerHTML = htmlResultado;
+        }
+    </script>
+</body>
+</html>
